@@ -190,5 +190,5 @@ ALTER DATABASE OPEN;
 ARCHIVE LOG LIST;
 ```
 output:
-![screenshot](/screenshotsavelog.png)
+![screenshot](screenshot/savelog.png)
 
