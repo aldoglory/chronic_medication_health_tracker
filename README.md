@@ -11,6 +11,7 @@ Pharmacist	Adds medication schedules, updates dosage/frequency
 Doctor: checks patien'ts health condition and take decisions 
 System Administrator	Manages users, system privileges, database integrity
 Patient	Provides medication compliance information
+![screenshot](screenshot/bpmn.png)
 
 ## EXPLANATION (For GitHub / Report)
 
