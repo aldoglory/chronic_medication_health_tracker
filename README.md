@@ -92,3 +92,93 @@ Slowly Changing Dimensions: Track patient chronic disease changes over time
 Aggregation Levels: Weekly, monthly, yearly adherence summaries
 
 Audit Trails: Use triggers to log inserts/updates/deletes in Adherence_Log
+## PHASE IV: Database Creation
+ # create pdb
+CREATE PLUGGABLE DATABASE wed_27717_gloire_chronic_medication_tracker_DB
+ADMIN USER gloire_admin IDENTIFIED BY Gloire
+ROLES = (DBA)
+DEFAULT TABLESPACE cdm_data
+DATAFILE 'C:\oracle\oradata\ORCL\wed_27717_gloire_chronic_medication_tracker_DB_data01.dbf'
+    SIZE 100M AUTOEXTEND ON NEXT 10M MAXSIZE 500M
+FILE_NAME_CONVERT = (
+    'C:\oracle\oradata\ORCL\PDBSEED\',
+    'C:\oracle\oradata\ORCL\wed_27717_gloire_chronic_medication_tracker_DB\'
+);
+
+   # open pdb
+
+ALTER PLUGGABLE DATABASE wed_27717_gloire_chronic_medication_tracker_DB OPEN;
+
+ALTER PLUGGABLE DATABASE wed_27717_gloire_chronic_medication_tracker_DB SAVE STATE;
+
+ creating table spaces
+
+
+SET ECHO ON
+
+CREATE TABLESPACE cdm_data
+DATAFILE 'C:\oracle\oradata\ORCL\wed_27717_gloire_chronic_medication_tracker_DB_cdm_data01.dbf'
+SIZE 200M
+AUTOEXTEND ON NEXT 20M MAXSIZE UNLIMITED
+EXTENT MANAGEMENT LOCAL;
+
+CREATE TABLESPACE cdm_index
+DATAFILE 'C:\oracle\oradata\ORCL\wed_27717_gloire_chronic_medication_tracker_DB_cdm_index01.dbf'
+SIZE 100M
+AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED
+EXTENT MANAGEMENT LOCAL;
+
+
+CREATE TEMPORARY TABLESPACE cdm_temp
+TEMPFILE 'C:\oracle\oradata\ORCL\wed_27717_gloire_chronic_medication_tracker_DB_cdm_temp01.dbf'
+SIZE 100M
+AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+
+
+SELECT tablespace_name, contents, status FROM dba_tablespaces WHERE tablespace_name IN ('CDM_DATA','CDM_INDEX','CDM_TEMP');
+
+
+# create admin user
+
+SET ECHO ON
+
+CREATE USER gloire_admin IDENTIFIED BY "Gloire"
+  DEFAULT TABLESPACE cdm_data
+  TEMPORARY TABLESPACE cdm_temp
+  QUOTA UNLIMITED ON cdm_data;
+
+GRANT CONNECT, RESOURCE TO gloire_admin;
+GRANT DBA TO gloire_admin;
+
+SELECT username, default_tablespace, temporary_tablespace
+FROM dba_users
+WHERE username = 'GLOIRE_ADMIN';
+
+ # init params
+
+
+SET ECHO ON
+
+ALTER SYSTEM SET sga_target = 512M SCOPE=SPFILE;
+ALTER SYSTEM SET pga_aggregate_target = 256M SCOPE=SPFILE;
+
+ALTER SYSTEM SET memory_max_target = 768M SCOPE=SPFILE;
+
+
+# enable archive log
+
+
+
+SET ECHO ON
+
+ALTER DATABASE ARCHIVELOG;
+
+
+ALTER DATABASE ADD LOGFILE GROUP 3 ('C:\oracle\oradata\ORCL\redo03.log') SIZE 50M;
+
+ALTER DATABASE OPEN;
+
+
+ARCHIVE LOG LIST;
+
+
