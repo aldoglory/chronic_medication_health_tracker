@@ -138,6 +138,8 @@ AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
 SELECT tablespace_name, contents, status FROM dba_tablespaces WHERE tablespace_name IN ('CDM_DATA','CDM_INDEX','CDM_TEMP');
 ```
+output:
+![screenshot](screenshot/table_space.png)
 
 # create admin user
 ```sql
@@ -155,9 +157,11 @@ SELECT username, default_tablespace, temporary_tablespace
 FROM dba_users
 WHERE username = 'GLOIRE_ADMIN';
 ```
+output:
+![screenshot](screenshot/admin_user.png)
+
  # init params
 ```sql
-
 SET ECHO ON
 
 ALTER SYSTEM SET sga_target = 512M SCOPE=SPFILE;
@@ -165,6 +169,8 @@ ALTER SYSTEM SET pga_aggregate_target = 256M SCOPE=SPFILE;
 
 ALTER SYSTEM SET memory_max_target = 768M SCOPE=SPFILE;
 ```
+output:
+![screenshot](screenshot/init_para.png)
 
 
 # enable archive log
@@ -183,4 +189,6 @@ ALTER DATABASE OPEN;
 
 ARCHIVE LOG LIST;
 ```
+output:
+![screenshot](savelog/bpmn.png)
 
