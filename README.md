@@ -261,7 +261,7 @@ CREATE TABLE nurse_review (
 
 ```
 output:
-![screenshot](screenshot/nurse_review.PNG)
+![screenshot](screenshot/nurse.PNG)
 # Doctor Review Table
 
 ```sql
