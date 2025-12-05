@@ -224,7 +224,7 @@ CREATE TABLE medication (
 );
 ```
 output:
-![screenshot](screenshot/medication.png)
+![screenshot](screenshot/medication.PNG)
 # Adherence Log (Fact Table)
 
 ```sql
@@ -243,7 +243,7 @@ CREATE TABLE adherence_log (
 );
 ```
 output:
-![screenshot](screenshot/adherence.png)
+![screenshot](screenshot/adherence.PNG)
 # Nurse Review Table
 
 ```sql
@@ -261,7 +261,7 @@ CREATE TABLE nurse_review (
 
 ```
 output:
-![screenshot](screenshot/nurse_review.png)
+![screenshot](screenshot/nurse_review.PNG)
 # Doctor Review Table
 
 ```sql
@@ -276,8 +276,8 @@ CREATE TABLE doctor_review (
 );
 ```
 output:
-![screenshot](screenshot/doctor.png)
-# Pharmacist Advice Table
+![screenshot](screenshot/doctor.PNG)
+# Pharmacist Advice Table ??
 
 ```sql
 CREATE TABLE pharmacist_advice (
@@ -292,7 +292,7 @@ CREATE TABLE pharmacist_advice (
 );
 ```
 output:
-![screenshot](screenshot/pharmacist.png)
+![screenshot](screenshot/pharmacist.PNG)
 
 # Reports Table
 
@@ -308,7 +308,7 @@ CREATE TABLE reports (
 );
 ```
 output:
-![screenshot](screenshot/reports.png)
+![screenshot](screenshot/reports.PNG)
 # Indexes
 
 ```sql
@@ -345,7 +345,7 @@ Viewing inserted data
 select * from medication;
 ```
 output:
-![screenshot](screenshot/select_medication.png)
+![screenshot](screenshot/select_medication.PNG)
 # inserting into patients
 
 ```sql
@@ -381,7 +381,7 @@ Viewing inserted data
 select * from patient;
 ```
 output:
-![screenshot](screenshot/insert_patient.png)
+![screenshot](screenshot/insert_patient.PNG)
 
 # Inserting into Adherence Logs
 
@@ -438,7 +438,7 @@ Viewing inserted data
 select * from adherence_log;
 ```
 output:
-![screenshot](screenshot/insert_adhe.png)
+![screenshot](screenshot/insert_adhe.PNG)
 
 # insert into  Pharmacist Advice
 ```sql
@@ -467,7 +467,7 @@ Viewing inserted data
 select * from pharmacist_advice;
 ```
 output:
-![screenshot](screenshot/insert_pharmacy.png)
+![screenshot](screenshot/insert_pharmacy.PNG)
 # insert into doctor_review
 
 ```sql
@@ -498,7 +498,7 @@ Viewing inserted data
 select * from doctor_review;
 ```
 output:
-![screenshot](screenshot/insert_doctor.png)
+![screenshot](screenshot/insert_doctor.PNG)
 # insert into Nusrse reviews
 ```sql
 DECLARE
@@ -525,7 +525,7 @@ Viewing inserted data
 select * from nurse_review;
 ```
 output:
-![screenshot](screenshot/insert_nurse.png)
+![screenshot](screenshot/insert_nurse.PNG)
 
 
 
