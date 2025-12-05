@@ -27,6 +27,9 @@ PL/SQL triggers automatically detect missed doses and generate alerts, helping h
 
 This MIS improves accuracy of patient records, strengthens follow-up, and supports data-driven healthcare. The stored data also enables analytics such as identifying high-risk patients, predicting adherence trends, and evaluating medication effectiveness. The entire process ensures coordinated work across Nursing, Pharmacy, and IT departments while supporting efficient and reliable chronic disease management.
 
+## Entity-Relationship (ER) Model Design
+ # Entities, Attributes, and Keys
+
 
 
 | Entity            | Attributes                                                                                                             | PK               | FK                        | Notes                               |
@@ -39,4 +42,4 @@ This MIS improves accuracy of patient records, strengthens follow-up, and suppor
 | Pharmacist_Advice | Advice_ID (NUMBER), Patient_ID (NUMBER), Medication_ID (NUMBER), Advice_Date (DATE), Notes (VARCHAR2)                  | Advice_ID        | Patient_ID, Medication_ID | Pharmacist recommends adjustments   |
 | Report            | Report_ID (NUMBER), Report_Type (VARCHAR2), Generated_Date (DATE), Content (CLOB)                                      | Report_ID        | -                         | MIS reports                         |
 
-
+The following diagram is the ERD for the project
