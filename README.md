@@ -155,7 +155,7 @@ FROM dba_users
 WHERE username = 'GLOIRE_ADMIN';
 
  # init params
-
+'''sql
 
 SET ECHO ON
 
@@ -163,6 +163,7 @@ ALTER SYSTEM SET sga_target = 512M SCOPE=SPFILE;
 ALTER SYSTEM SET pga_aggregate_target = 256M SCOPE=SPFILE;
 
 ALTER SYSTEM SET memory_max_target = 768M SCOPE=SPFILE;
+'''
 
 
 # enable archive log
