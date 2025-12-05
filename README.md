@@ -43,3 +43,4 @@ This MIS improves accuracy of patient records, strengthens follow-up, and suppor
 | Report            | Report_ID (NUMBER), Report_Type (VARCHAR2), Generated_Date (DATE), Content (CLOB)                                      | Report_ID        | -                         | MIS reports                         |
 
 The following diagram is the ERD for the project
+![erd](screenshot/erd.png)
