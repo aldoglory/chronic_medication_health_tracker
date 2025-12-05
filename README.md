@@ -27,3 +27,16 @@ PL/SQL triggers automatically detect missed doses and generate alerts, helping h
 
 This MIS improves accuracy of patient records, strengthens follow-up, and supports data-driven healthcare. The stored data also enables analytics such as identifying high-risk patients, predicting adherence trends, and evaluating medication effectiveness. The entire process ensures coordinated work across Nursing, Pharmacy, and IT departments while supporting efficient and reliable chronic disease management.
 
+
+
+| Entity            | Attributes                                                                                                             | PK               | FK                        | Notes                               |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------- | ----------------------------------- |
+| Patient           | Patient_ID (NUMBER), Name (VARCHAR2), Age (NUMBER), Gender (CHAR), Chronic_Disease (VARCHAR2), Contact_Info (VARCHAR2) | Patient_ID       | -                         | Patient logs medications            |
+| Medication        | Medication_ID (NUMBER), Name (VARCHAR2), Dose (VARCHAR2), Frequency (VARCHAR2), Duration (NUMBER)                      | Medication_ID    | -                         | Prescribed medications              |
+| Adherence_Log     | Log_ID (NUMBER), Patient_ID (NUMBER), Medication_ID (NUMBER), Date_Taken (DATE), Status (VARCHAR2)                     | Log_ID           | Patient_ID, Medication_ID | Tracks if patient took the medicine |
+| Nurse_Review      | Review_ID (NUMBER), Patient_ID (NUMBER), Log_ID (NUMBER), Review_Date (DATE), Notes (VARCHAR2)                         | Review_ID        | Patient_ID, Log_ID        | Nurse checks adherence              |
+| Doctor_Review     | Doctor_Review_ID (NUMBER), Patient_ID (NUMBER), Review_Date (DATE), Diagnosis (VARCHAR2), Prescription (VARCHAR2)      | Doctor_Review_ID | Patient_ID                | Doctor reviews condition            |
+| Pharmacist_Advice | Advice_ID (NUMBER), Patient_ID (NUMBER), Medication_ID (NUMBER), Advice_Date (DATE), Notes (VARCHAR2)                  | Advice_ID        | Patient_ID, Medication_ID | Pharmacist recommends adjustments   |
+| Report            | Report_ID (NUMBER), Report_Type (VARCHAR2), Generated_Date (DATE), Content (CLOB)                                      | Report_ID        | -                         | MIS reports                         |
+
+
