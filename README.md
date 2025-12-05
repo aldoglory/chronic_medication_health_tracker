@@ -528,5 +528,237 @@ output:
 ![screenshot](screenshot/insert_nurse.PNG)
 
 
+##### nfn
 
+
+ # Check Row Counts
+```sql
+SELECT COUNT(*) AS patient_count FROM patient;
+
+SELECT COUNT(*) AS medication_count FROM medication;
+
+SELECT COUNT(*) AS adherence_log_count FROM adherence_log;
+
+SELECT COUNT(*) AS nurse_review_count FROM nurse_review;
+
+
+SELECT COUNT(*) AS doctor_review_count FROM doctor_review;
+
+SELECT COUNT(*) AS pharmacist_advice_count FROM pharmacist_advice;
+```
+# Check NULLs in Required Columns
+```sql
+-- Patients with missing first or last name
+SELECT * FROM patient WHERE first_name IS NULL OR last_name IS NULL;
+
+-- Adherence logs with missing status or patient_id
+SELECT * FROM adherence_log WHERE status IS NULL OR patient_id IS NULL OR medication_id IS NULL;
+
+-- Nurse reviews without log_id or nurse_name
+SELECT * FROM nurse_review WHERE log_id IS NULL OR nurse_name IS NULL;
+
+-- Doctor reviews without patient_id
+SELECT * FROM doctor_review WHERE patient_id IS NULL;
+
+-- Pharmacist advice missing patient or medication
+SELECT * FROM pharmacist_advice WHERE patient_id IS NULL OR medication_id IS NULL;
+```
+ # Verify Foreign Key Relationships
+```sql
+-- Adherence logs linked to existing patients
+SELECT a.* 
+FROM adherence_log a
+LEFT JOIN patient p ON a.patient_id = p.patient_id
+WHERE p.patient_id IS NULL;
+
+-- Adherence logs linked to existing medications
+SELECT a.*
+FROM adherence_log a
+LEFT JOIN medication m ON a.medication_id = m.medication_id
+WHERE m.medication_id IS NULL;
+
+-- Nurse reviews linked to adherence logs
+SELECT n.*
+FROM nurse_review n
+LEFT JOIN adherence_log a ON n.log_id = a.log_id
+WHERE a.log_id IS NULL;
+
+-- Doctor reviews linked to patients
+SELECT d.*
+FROM doctor_review d
+LEFT JOIN patient p ON d.patient_id = p.patient_id
+WHERE p.patient_id IS NULL;
+
+-- Pharmacist advice linked to patients and medications
+SELECT pa.*
+FROM pharmacist_advice pa
+LEFT JOIN patient p ON pa.patient_id = p.patient_id
+LEFT JOIN medication m ON pa.medication_id = m.medication_id
+WHERE p.patient_id IS NULL OR m.medication_id IS NULL;
+
+```
+output:
+![screenshot](screenshot/row_count.PNG)
+
+
+# check unique constraints
+```sql
+--- Duplicate national IDs in patients
+SELECT national_id, COUNT(*) 
+FROM patient
+WHERE national_id IS NOT NULL
+GROUP BY national_id
+HAVING COUNT(*) > 1;
+
+-- Duplicate med_codes in medications
+SELECT med_code, COUNT(*) 
+FROM medication
+GROUP BY med_code
+HAVING COUNT(*) > 1;
+
+-- Duplicate adherence log for same patient-medication-scheduled_date
+SELECT patient_id, medication_id, scheduled_date, COUNT(*) 
+FROM adherence_log
+GROUP BY patient_id, medication_id, scheduled_date
+HAVING COUNT(*) > 1;
+
+```
+output:
+![screenshot](screenshot/unique.PNG)
+# Data Complitness check
+```sql
+-- Patients who never had an adherence log
+SELECT p.* 
+FROM patient p
+LEFT JOIN adherence_log a ON p.patient_id = a.patient_id
+WHERE a.patient_id IS NULL;
+
+-- Patients with missed logs but no nurse review
+SELECT a.patient_id, COUNT(*) missed_logs
+FROM adherence_log a
+LEFT JOIN nurse_review n ON a.log_id = n.log_id
+WHERE a.status='MISSED'
+GROUP BY a.patient_id
+HAVING COUNT(n.review_id) = 0;
+
+-- Patients with multiple doctor reviews
+SELECT patient_id, COUNT(*) AS num_reviews
+FROM doctor_review
+GROUP BY patient_id
+HAVING COUNT(*) > 1;
+```
+output:
+![screenshot](screenshot/complitness.PNG)
+## TESTING
+# basic Retrieval (SELECT *)
+```sql
+-- All patients
+SELECT * FROM patient;
+
+-- All medications
+SELECT * FROM medication;
+
+-- All adherence logs
+SELECT * FROM adherence_log;
+
+-- All nurse reviews
+SELECT * FROM nurse_review;
+```
+output:
+![screenshot](screenshot/select.PNG)
+
+# Joins (Multi-table Queries)
+
+```sql
+-- Adherence logs with patient names and medication names
+SELECT a.log_id, p.first_name || ' ' || p.last_name AS patient_name,
+       m.med_name, a.scheduled_date, a.actual_taken_date, a.status
+FROM adherence_log a
+JOIN patient p ON a.patient_id = p.patient_id
+JOIN medication m ON a.medication_id = m.medication_id
+WHERE ROWNUM <= 20;
+
+-- Nurse reviews with adherence log info
+SELECT n.review_id, n.nurse_name, n.severity_flag, a.patient_id, a.status
+FROM nurse_review n
+JOIN adherence_log a ON n.log_id = a.log_id
+ORDER BY n.review_date DESC
+FETCH FIRST 10 ROWS ONLY;
+
+-- Doctor reviews with patient info and count of missed adherence logs
+SELECT d.doctor_review_id, p.first_name || ' ' || p.last_name AS patient_name,
+       d.diagnosis, COUNT(a.log_id) AS missed_logs
+FROM doctor_review d
+JOIN patient p ON d.patient_id = p.patient_id
+LEFT JOIN adherence_log a ON d.patient_id = a.patient_id AND a.status='MISSED'
+GROUP BY d.doctor_review_id, p.first_name, p.last_name, d.diagnosis;
+```
+outputs:
+![screenshot](screenshot/joins.PNG)
+# aggregations (GROUP BY)
+```sql
+-- Number of adherence logs per patient
+SELECT patient_id, COUNT(*) AS total_logs
+FROM adherence_log
+GROUP BY patient_id
+ORDER BY total_logs DESC;
+
+-- Adherence status counts
+SELECT status, COUNT(*) AS count_per_status
+FROM adherence_log
+GROUP BY status;
+
+-- Number of nurse reviews per severity
+SELECT severity_flag, COUNT(*) AS review_count
+FROM nurse_review
+GROUP BY severity_flag;
+
+-- Number of pharmacist advices per patient
+SELECT patient_id, COUNT(*) AS advice_count
+FROM pharmacist_advice
+GROUP BY patient_id
+ORDER BY advice_count DESC;
+```
+output:
+![screenshot](screenshot/aggregation.PNG)
+
+# Subqueries
+```sql
+-- Patients with more than 5 missed doses
+SELECT * FROM patient
+WHERE patient_id IN (
+  SELECT patient_id
+  FROM adherence_log
+  WHERE status='MISSED'
+  GROUP BY patient_id
+  HAVING COUNT(*) > 5
+);
+
+-- Medications that have never been taken late
+SELECT * FROM medication
+WHERE medication_id NOT IN (
+  SELECT DISTINCT medication_id
+  FROM adherence_log
+  WHERE status='LATE'
+);
+
+-- Latest nurse review for each log
+SELECT * FROM nurse_review n
+WHERE review_date = (
+  SELECT MAX(review_date)
+  FROM nurse_review
+  WHERE log_id = n.log_id
+);
+
+-- Patients with adherence logs but no doctor review
+SELECT * FROM patient
+WHERE patient_id IN (
+  SELECT patient_id FROM adherence_log
+)
+AND patient_id NOT IN (
+  SELECT patient_id FROM doctor_review
+);
+```
+output:
+![screenshot](screenshot/subqueries.PNG)
 
