@@ -43,4 +43,52 @@ This MIS improves accuracy of patient records, strengthens follow-up, and suppor
 | Report            | Report_ID (NUMBER), Report_Type (VARCHAR2), Generated_Date (DATE), Content (CLOB)                                      | Report_ID        | -                         | MIS reports                         |
 
 The following diagram is the ERD for the project
-![erd](screenshot/erd.png)
+![erd](screenshot/erd.jpeg)
+
+# Cardinalities / Relationships
+
+Patient → Adherence_Log: 1:N (a patient can have many logs)
+
+Medication → Adherence_Log: 1:N (a medication can be logged many times)
+
+Patient → Nurse_Review: 1:N (a patient can have multiple reviews)
+
+Patient → Doctor_Review: 1:N
+
+Patient → Pharmacist_Advice: 1:N
+
+Adherence_Log → Nurse_Review: 1:1 (each log reviewed by nurse)
+# Normalization
+1NF (Eliminate repeating groups)
+
+Each table has atomic attributes (e.g., no multiple medications in one field).
+
+2NF (Eliminate partial dependencies)
+
+Adherence_Log depends on both Patient_ID and Medication_ID, not just one, so we separate entities properly.
+
+3NF (Eliminate transitive dependencies)
+
+Attributes like Doctor prescription notes only depend on Doctor_Review_ID, not on Patient_ID directly.
+
+Nurse notes depend on Review_ID, not Patient_ID directly.
+# Data Dictionary Example (Partial)
+| Table         | Column     | Data Type     | Constraint                           | Description                     |
+| ------------- | ---------- | ------------- | ------------------------------------ | ------------------------------- |
+| Patient       | Patient_ID | NUMBER        | PK                                   | Unique patient identifier       |
+| Patient       | Name       | VARCHAR2(100) | NOT NULL                             | Full patient name               |
+| Adherence_Log | Status     | VARCHAR2(10)  | CHECK (Status IN ('Taken','Missed')) | Whether patient took medication |
+| Doctor_Review | Diagnosis  | VARCHAR2(200) | NULLABLE                             | Doctor’s diagnosis              |
+| Report        | Content    | CLOB          | NOT NULL                             | Generated adherence report      |
+
+# BI Considerations
+
+Fact tables: Adherence_Log (measures patient adherence)
+
+Dimension tables: Patient, Medication, Nurse, Doctor, Pharmacist
+
+Slowly Changing Dimensions: Track patient chronic disease changes over time
+
+Aggregation Levels: Weekly, monthly, yearly adherence summaries
+
+Audit Trails: Use triggers to log inserts/updates/deletes in Adherence_Log
