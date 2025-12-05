@@ -5,9 +5,10 @@ Process Name:Chronic Medication Monitoring Workflow
 Domain: Healthcare MIS
 Purpose: To track chronic disease patients’ medication adherence using a database-driven monitoring system.
 Actors (Users)
-Actor	Role & Responsibilities
-Nurse / Healthcare Provider	Registers patients, enters adherence logs, reviews reports
+# Actor	Role & Responsibilities
+Nurse / Healthcare Provider	Registers patients enters adherence logs, reviews reports
 Pharmacist	Adds medication schedules, updates dosage/frequency
+Doctor: checks patien'ts health condition and take decisions 
 System Administrator	Manages users, system privileges, database integrity
 Patient	Provides medication compliance information
 
