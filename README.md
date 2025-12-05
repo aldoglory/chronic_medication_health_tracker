@@ -94,6 +94,7 @@ Aggregation Levels: Weekly, monthly, yearly adherence summaries
 Audit Trails: Use triggers to log inserts/updates/deletes in Adherence_Log
 ## PHASE IV: Database Creation
  # create pdb
+ ```sql
 CREATE PLUGGABLE DATABASE wed_27717_gloire_chronic_medication_tracker_DB
 ADMIN USER gloire_admin IDENTIFIED BY Gloire
 ROLES = (DBA)
@@ -103,17 +104,17 @@ DATAFILE 'C:\oracle\oradata\ORCL\wed_27717_gloire_chronic_medication_tracker_DB_
 FILE_NAME_CONVERT = (
     'C:\oracle\oradata\ORCL\PDBSEED\',
     'C:\oracle\oradata\ORCL\wed_27717_gloire_chronic_medication_tracker_DB\'
-);
+);```
 
    # open pdb
-
+```sql
 ALTER PLUGGABLE DATABASE wed_27717_gloire_chronic_medication_tracker_DB OPEN;
 
 ALTER PLUGGABLE DATABASE wed_27717_gloire_chronic_medication_tracker_DB SAVE STATE;
+```
+# creating table spaces
 
- creating table spaces
-
-
+```sql
 SET ECHO ON
 
 CREATE TABLESPACE cdm_data
@@ -136,10 +137,10 @@ AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
 
 
 SELECT tablespace_name, contents, status FROM dba_tablespaces WHERE tablespace_name IN ('CDM_DATA','CDM_INDEX','CDM_TEMP');
-
+```
 
 # create admin user
-
+```sql
 SET ECHO ON
 
 CREATE USER gloire_admin IDENTIFIED BY "Gloire"
@@ -153,7 +154,7 @@ GRANT DBA TO gloire_admin;
 SELECT username, default_tablespace, temporary_tablespace
 FROM dba_users
 WHERE username = 'GLOIRE_ADMIN';
-
+```
  # init params
 ```sql
 
