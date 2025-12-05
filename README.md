@@ -169,7 +169,7 @@ ALTER SYSTEM SET memory_max_target = 768M SCOPE=SPFILE;
 
 # enable archive log
 
-
+```sql
 
 SET ECHO ON
 
@@ -182,5 +182,5 @@ ALTER DATABASE OPEN;
 
 
 ARCHIVE LOG LIST;
-
+```
 
