@@ -190,5 +190,5 @@ ALTER DATABASE OPEN;
 ARCHIVE LOG LIST;
 ```
 output:
-![screenshot](savelog/bpmn.png)
+![screenshot](savelog.png)
 
