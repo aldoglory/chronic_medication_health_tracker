@@ -208,6 +208,8 @@ CREATE TABLE patient (
   created_at         DATE DEFAULT SYSDATE NOT NULL
 );
 ```
+output:
+![screenshot](screenshot/patient.png)
 # creating medication table
 ```sql
 CREATE TABLE medication (
@@ -221,6 +223,8 @@ CREATE TABLE medication (
   created_at         DATE DEFAULT SYSDATE NOT NULL
 );
 ```
+output:
+![screenshot](screenshot/medication.png)
 # Adherence Log (Fact Table)
 
 ```sql
@@ -238,6 +242,8 @@ CREATE TABLE adherence_log (
   CONSTRAINT fk_al_med FOREIGN KEY (medication_id) REFERENCES medication(medication_id)
 );
 ```
+output:
+![screenshot](screenshot/adherence.png)
 # Nurse Review Table
 
 ```sql
@@ -254,6 +260,8 @@ CREATE TABLE nurse_review (
 );
 
 ```
+output:
+![screenshot](screenshot/nurse_review.png)
 # Doctor Review Table
 
 ```sql
@@ -267,6 +275,8 @@ CREATE TABLE doctor_review (
   CONSTRAINT fk_dr_patient FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
 );
 ```
+output:
+![screenshot](screenshot/doctor.png)
 # Pharmacist Advice Table
 
 ```sql
@@ -281,6 +291,8 @@ CREATE TABLE pharmacist_advice (
   CONSTRAINT fk_pa_med FOREIGN KEY (medication_id) REFERENCES medication(medication_id)
 );
 ```
+output:
+![screenshot](screenshot/pharmacist.png)
 
 # Reports Table
 
@@ -295,6 +307,8 @@ CREATE TABLE reports (
   content_blob       CLOB
 );
 ```
+output:
+![screenshot](screenshot/reports.png)
 # Indexes
 
 ```sql
@@ -330,6 +344,8 @@ Viewing inserted data
 ```sql
 select * from medication;
 ```
+output:
+![screenshot](screenshot/select_medication.png)
 # inserting into patients
 
 ```sql
@@ -364,6 +380,8 @@ Viewing inserted data
 ```sql
 select * from patient;
 ```
+output:
+![screenshot](screenshot/insert_patient.png)
 
 # Inserting into Adherence Logs
 
@@ -419,6 +437,8 @@ Viewing inserted data
 ```sql
 select * from adherence_log;
 ```
+output:
+![screenshot](screenshot/insert_adhe.png)
 
 # insert into  Pharmacist Advice
 ```sql
@@ -446,6 +466,8 @@ Viewing inserted data
 ```sql
 select * from pharmacist_advice;
 ```
+output:
+![screenshot](screenshot/insert_pharmacy.png)
 # insert into doctor_review
 
 ```sql
@@ -475,6 +497,8 @@ Viewing inserted data
 ```sql
 select * from doctor_review;
 ```
+output:
+![screenshot](screenshot/insert_doctor.png)
 # insert into Nusrse reviews
 ```sql
 DECLARE
@@ -500,6 +524,8 @@ Viewing inserted data
 ```sql
 select * from nurse_review;
 ```
+output:
+![screenshot](screenshot/insert_nurse.png)
 
 
 
