@@ -277,7 +277,7 @@ CREATE TABLE doctor_review (
 ```
 output:
 ![screenshot](screenshot/doctor.PNG)
-# Pharmacist Advice Table ??
+# Pharmacist Advice Table 
 
 ```sql
 CREATE TABLE pharmacist_advice (
@@ -292,7 +292,7 @@ CREATE TABLE pharmacist_advice (
 );
 ```
 output:
-![screenshot](screenshot/pharmacist.PNG)
+![screenshot](screenshot/advice.PNG)
 
 # Reports Table
 
