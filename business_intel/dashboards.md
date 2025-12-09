@@ -1,10 +1,10 @@
 # Dashboards
 
 ## 1. Medication Compliance Dashboard
-![screenshot](screenshot/bidashboard.png)
+![screenshot](screenshot/bidash.jpeg)
 
 ## 2. Audit Activity Dashboard
-![screenshot](screenshot/audit.JPEG)
+![screenshot](screenshot/audit.jpeg)
 
 
 
