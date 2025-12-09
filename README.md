@@ -1,4 +1,29 @@
-### PHASE II: BUSINESS PROCESS MODELING
+Project Overview
+Project Name: Chronic Disease Medication Adherence Monitoring System
+Project Lead: Ruterana Gloire
+Student ID: 27717
+Date: December 2025
+
+## Executive Summary
+The Chronic Disease Medication Adherence Monitoring System is a comprehensive digital health solution designed to address one of healthcare's most persistent challenges: medication non-adherence among chronic disease patients. This system combines smart reminder technology, real-time tracking, and healthcare provider monitoring to create a seamless ecosystem that supports patients in managing their medication schedules while enabling healthcare workers to provide proactive, data-driven care.
+# Problem Statement
+The Adherence Crisis
+Medication non-adherence is a global healthcare crisis with devastating consequences:
+
+50% of chronic disease patients do not take medications as prescribed
+125,000 deaths annually in the US alone are attributed to poor medication adherence
+$300 billion in avoidable healthcare costs result from non-adherence
+Hospital readmission rates increase by 50-80% among non-adherent patients
+ # Root Causes
+Patients struggle with medication adherence due to:
+
+Forgetfulness - Busy lifestyles and cognitive challenges
+Complex schedules - Multiple medications with different timing requirements
+Lack of understanding - Insufficient knowledge about medication importance
+Side effects - Discouragement from adverse reactions
+Poor tracking - Inability to monitor intake patterns
+Limited provider visibility - Healthcare workers can't identify non-adherence until complications arise
+###  BUSINESS PROCESS MODELING
 ## Project: Chronic Diseases Medication Adherence Monitoring System (PL/SQL Capstone)
 # Scope of the Business Process
 Process Name:Chronic Medication Monitoring Workflow
