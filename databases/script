@@ -1,1 +1,113 @@
+# create
+```sql
+-- Patients table
+CREATE TABLE patients (
+    patient_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50),
+    last_name VARCHAR2(50),
+    date_of_birth DATE,
+    gender VARCHAR2(10)
+);
 
+-- Medications table
+CREATE TABLE medications (
+    med_id NUMBER PRIMARY KEY,
+    med_name VARCHAR2(100),
+    dosage VARCHAR2(50)
+);
+
+-- Patient medication intake table
+CREATE TABLE patient_medications (
+    intake_id NUMBER PRIMARY KEY,
+    patient_id NUMBER REFERENCES patients(patient_id),
+    med_id NUMBER REFERENCES medications(med_id),
+    intake_date DATE,
+    status VARCHAR2(20) -- e.g., 'taken', 'skipped'
+);
+
+-- Nurses table
+CREATE TABLE nurses (
+    nurse_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50),
+    last_name VARCHAR2(50)
+);
+
+-- Doctors table
+CREATE TABLE doctors (
+    doctor_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50),
+    last_name VARCHAR2(50)
+);
+
+-- Pharmacists table
+CREATE TABLE pharmacists (
+    pharmacist_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50),
+    last_name VARCHAR2(50)
+);
+
+-- Audit table
+CREATE TABLE audit_log (
+    audit_id NUMBER PRIMARY KEY,
+    patient_id NUMBER,
+    action VARCHAR2(100),
+    action_date DATE DEFAULT SYSDATE
+);
+```
+# insert
+```sql
+-- Patients
+INSERT INTO patients VALUES (1, 'Alice', 'Smith', TO_DATE('1980-05-15','YYYY-MM-DD'), 'Female');
+INSERT INTO patients VALUES (2, 'Bob', 'Jones', TO_DATE('1975-08-20','YYYY-MM-DD'), 'Male');
+
+-- Medications
+INSERT INTO medications VALUES (1, 'Metformin', '500mg');
+INSERT INTO medications VALUES (2, 'Lisinopril', '10mg');
+
+-- Nurses
+INSERT INTO nurses VALUES (1, 'Mary', 'Johnson');
+
+-- Doctors
+INSERT INTO doctors VALUES (1, 'Dr. John', 'Doe');
+
+-- Pharmacists
+INSERT INTO pharmacists VALUES (1, 'Paul', 'Brown');
+
+-- Patient medication intake
+INSERT INTO patient_medications VALUES (1, 1, 1, TO_DATE('2025-12-09','YYYY-MM-DD'), 'taken');
+INSERT INTO patient_medications VALUES (2, 1, 2, TO_DATE('2025-12-09','YYYY-MM-DD'), 'skipped');
+```
+# procedures
+```sql
+CREATE OR REPLACE PROCEDURE add_medication_intake(
+    p_patient_id IN NUMBER,
+    p_med_id IN NUMBER,
+    p_intake_date IN DATE,
+    p_status IN VARCHAR2
+)
+IS
+BEGIN
+    INSERT INTO patient_medications(patient_id, med_id, intake_date, status)
+    VALUES (p_patient_id, p_med_id, p_intake_date, p_status);
+
+    INSERT INTO audit_log(patient_id, action)
+    VALUES (p_patient_id, 'Medication intake recorded: ' || p_status);
+
+    COMMIT;
+END;
+
+```
+# triggers
+trigger for skipped medication
+```sql
+CREATE OR REPLACE TRIGGER trg_skipped_medication
+AFTER INSERT ON patient_medications
+FOR EACH ROW
+WHEN (NEW.status = 'skipped')
+BEGIN
+    -- Notify pharmacist
+    INSERT INTO audit_log(patient_id, action)
+    VALUES (:NEW.patient_id, 'Skipped medication detected, pharmacist notified');
+END;
+
+```
