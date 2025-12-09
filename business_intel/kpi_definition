@@ -1,1 +1,15 @@
+# Key Performance Indicators (KPIs)
+
+## Medication Compliance KPIs
+- **Compliance Rate (%)** = (Medications Taken / Total Medications) * 100
+- **Missed Medications Count** = Total medications skipped per patient.
+
+## Audit KPIs
+- **Unauthorized Access Attempts** = Count of failed login or restricted actions.
+- **Average Actions per User** = Total actions / Number of active users.
+
+## Inventory KPIs
+- **Stock Utilization Rate (%)** = (Quantity Used / Starting Stock) * 100
+- **Reorder Alerts** = Items below minimum threshold.
+- **Inventory Turnover** = Number of times inventory is used in a month.
 
