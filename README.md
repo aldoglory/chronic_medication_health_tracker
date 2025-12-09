@@ -762,3 +762,430 @@ AND patient_id NOT IN (
 output:
 ![screenshot](screenshot/subqueries.PNG)
 
+### PHASE VI: Database Interaction & Transactions
+# Procedure: Add a New Patient
+```sql
+CREATE OR REPLACE PROCEDURE add_patient(
+    p_national_id   IN VARCHAR2,
+    p_first_name    IN VARCHAR2,
+    p_last_name     IN VARCHAR2,
+    p_birth_date    IN DATE,
+    p_gender        IN VARCHAR2,
+    p_contact_phone IN VARCHAR2,
+    p_contact_email IN VARCHAR2,
+    p_address       IN VARCHAR2,
+    p_patient_id    OUT NUMBER
+)
+IS
+BEGIN
+    INSERT INTO patient (national_id, first_name, last_name, birth_date, gender, contact_phone, contact_email, address)
+    VALUES (p_national_id, p_first_name, p_last_name, p_birth_date, p_gender, p_contact_phone, p_contact_email, p_address)
+    RETURNING patient_id INTO p_patient_id;
+
+    COMMIT;
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        DBMS_OUTPUT.PUT_LINE('Error: National ID already exists.');
+        p_patient_id := NULL;
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        p_patient_id := NULL;
+END add_patient;
+/
+
+```
+# Procedure: Record Medication Adherence
+```sql
+CREATE OR REPLACE PROCEDURE log_adherence(
+    p_patient_id       IN NUMBER,
+    p_medication_id    IN NUMBER,
+    p_scheduled_date   IN DATE,
+    p_status           IN VARCHAR2,
+    p_method           IN VARCHAR2,
+    p_notes            IN VARCHAR2
+)
+IS
+BEGIN
+    INSERT INTO adherence_log(patient_id, medication_id, scheduled_date, status, method, notes)
+    VALUES (p_patient_id, p_medication_id, p_scheduled_date, p_status, p_method, p_notes);
+
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Invalid patient or medication ID.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END log_adherence;
+/
+
+```
+# Procedure: Update Nurse Review Severity
+```sql
+CREATE OR REPLACE PROCEDURE update_nurse_review(
+    p_review_id     IN NUMBER,
+    p_severity_flag IN VARCHAR2
+)
+IS
+BEGIN
+    UPDATE nurse_review
+    SET severity_flag = p_severity_flag,
+        review_date = SYSDATE
+    WHERE review_id = p_review_id;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No review found with the given ID.');
+    ELSE
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Review updated successfully.');
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END update_nurse_review;
+/
+
+```
+# Function: Calculate Adherence Percentage for a Patient
+```sql
+
+CREATE OR REPLACE FUNCTION calc_adherence(p_patient_id IN NUMBER)
+RETURN NUMBER
+IS
+    v_total_logs NUMBER;
+    v_taken_logs NUMBER;
+    v_percentage NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_total_logs
+    FROM adherence_log
+    WHERE patient_id = p_patient_id;
+
+    IF v_total_logs = 0 THEN
+        RETURN 0; -- no logs, adherence is 0%
+    END IF;
+
+    SELECT COUNT(*) INTO v_taken_logs
+    FROM adherence_log
+    WHERE patient_id = p_patient_id
+      AND status = 'TAKEN';
+
+    v_percentage := (v_taken_logs / v_total_logs) * 100;
+    RETURN ROUND(v_percentage, 2);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+    WHEN OTHERS THEN
+        RETURN -1; -- indicates error
+END calc_adherence;
+/
+
+```
+# Function: Validate Adherence Status
+```sql
+CREATE OR REPLACE FUNCTION validate_status(p_status IN VARCHAR2)
+RETURN VARCHAR2
+IS
+BEGIN
+    IF p_status IN ('TAKEN', 'MISSED', 'LATE') THEN
+        RETURN 'VALID';
+    ELSE
+        RETURN 'INVALID';
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN 'ERROR';
+END validate_status;
+/
+
+```
+# function: Lookup Patient Name by ID
+```sql
+
+CREATE OR REPLACE FUNCTION get_patient_name(p_patient_id IN NUMBER)
+RETURN VARCHAR2
+IS
+    v_name VARCHAR2(200);
+BEGIN
+    SELECT first_name || ' ' || last_name INTO v_name
+    FROM patient
+    WHERE patient_id = p_patient_id;
+
+    RETURN v_name;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'UNKNOWN';
+    WHEN OTHERS THEN
+        RETURN 'ERROR';
+END get_patient_name;
+/
+
+```
+### Cursors
+This cursor loops through patients who missed medication and inserts a summary into a reporting table.
+Table (for demonstration)
+```sql
+CREATE TABLE missed_summary (
+  summary_id      NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  patient_id      NUMBER,
+  total_missed    NUMBER,
+  last_missed_on  DATE
+);
+
+```
+Explicit Cursor Procedure
+
+```sql
+CREATE OR REPLACE PROCEDURE summarize_missed_doses IS
+  
+  CURSOR c_missed IS
+    SELECT patient_id,
+           COUNT(*) AS missed_count,
+           MAX(scheduled_date) AS last_missed
+    FROM adherence_log
+    WHERE status = 'MISSED'
+    GROUP BY patient_id;
+
+  v_patient_id     NUMBER;
+  v_missed_count   NUMBER;
+  v_last_missed    DATE;
+
+BEGIN
+  OPEN c_missed;
+
+  LOOP
+    FETCH c_missed INTO v_patient_id, v_missed_count, v_last_missed;
+    EXIT WHEN c_missed%NOTFOUND;
+
+    INSERT INTO missed_summary (patient_id, total_missed, last_missed_on)
+    VALUES (v_patient_id, v_missed_count, v_last_missed);
+
+  END LOOP;
+
+  CLOSE c_missed;
+
+  DBMS_OUTPUT.PUT_LINE('Missed dose summary completed.');
+
+END;
+/
+
+```
+Test
+```sql
+BEGIN
+  summarize_missed_doses;
+END;
+/
+
+SELECT * FROM missed_summary;
+
+```
+# Bulk Processing with BULK COLLECT + FORALL
+ Bulk Insert Example: Clone adherence logs
+ ```sql
+CREATE OR REPLACE PROCEDURE bulk_clone_logs IS
+  TYPE t_logs IS TABLE OF adherence_log%ROWTYPE;
+
+  v_logs t_logs;
+BEGIN
+  SELECT * BULK COLLECT INTO v_logs
+  FROM adherence_log
+  WHERE scheduled_date >= SYSDATE - 7;
+
+  FORALL i IN 1..v_logs.COUNT
+    INSERT INTO adherence_log_clone VALUES v_logs(i);
+
+  DBMS_OUTPUT.PUT_LINE(v_logs.COUNT || ' logs cloned successfully.');
+END;
+/
+
+```
+Test
+```sql
+BEGIN
+  bulk_clone_logs;
+END;
+/
+
+```
+## WINDOW FUNCTION 
+ROW_NUMBER() — Identify latest log per patient
+```sql
+SELECT 
+  patient_id,
+  medication_id,
+  status,
+  scheduled_date,
+  ROW_NUMBER() OVER (
+    PARTITION BY patient_id 
+    ORDER BY scheduled_date DESC
+  ) AS rn
+FROM adherence_log;
+
+```
+DENSE_RANK() — Same ranking without skipping numbers
+``sql
+SELECT
+  patient_id,
+  COUNT(*) AS missed_count,
+  DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) AS dense_rank
+FROM adherence_log
+WHERE status = 'MISSED'
+GROUP BY patient_id;
+
+
+```
+LAG() — Compare today’s result with previous entry
+```sql
+SELECT
+  patient_id,
+  scheduled_date,
+  status,
+  LAG(status) OVER (
+    PARTITION BY patient_id 
+    ORDER BY scheduled_date
+  ) AS previous_status
+FROM adherence_log;
+
+```
+Aggregates with OVER() — Rolling total
+```sql
+
+SELECT
+  patient_id,
+  scheduled_date,
+  COUNT(*) OVER (
+    PARTITION BY patient_id 
+    ORDER BY scheduled_date
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS running_total
+FROM adherence_log;
+
+```
+##  Packages
+```sql
+CREATE OR REPLACE PACKAGE pkg_med_adherence AS
+
+  -------------------------------------------------------------------
+  -- Custom Exception Declarations
+  -------------------------------------------------------------------
+  ex_patient_not_found    EXCEPTION;
+  ex_medication_not_found EXCEPTION;
+  ex_invalid_dose_status  EXCEPTION;
+
+  PRAGMA EXCEPTION_INIT(ex_invalid_dose_status, -20001);
+
+  -------------------------------------------------------------------
+  -- PUBLIC FUNCTIONS
+  -------------------------------------------------------------------
+
+  -- Validate whether a patient exists
+  FUNCTION fn_check_patient(p_patient_id NUMBER) RETURN BOOLEAN;
+
+  -- Calculate total missed doses for a patient
+  FUNCTION fn_total_missed(p_patient_id NUMBER) RETURN NUMBER;
+
+  -- Lookup next scheduled dose
+  FUNCTION fn_next_dose(p_patient_id NUMBER) RETURN DATE;
+
+  -------------------------------------------------------------------
+  -- PUBLIC PROCEDURES
+  -------------------------------------------------------------------
+
+  -- Record medication adherence
+  PROCEDURE pr_record_adherence(
+      p_patient_id    IN NUMBER,
+      p_medication_id IN NUMBER,
+      p_status        IN VARCHAR2,
+      p_sched_date    IN DATE);
+
+  -- Insert nurse review
+  PROCEDURE pr_add_nurse_review(
+      p_log_id   IN NUMBER,
+      p_nurse    IN VARCHAR2,
+      p_severity IN VARCHAR2,
+      p_comment  IN VARCHAR2);
+
+  -- System error logger (public so test scripts can use it)
+  PROCEDURE pr_log_error(
+      p_unit_name IN VARCHAR2,
+      p_err_code  IN NUMBER,
+      p_err_msg   IN VARCHAR2,
+      p_input     IN VARCHAR2 DEFAULT NULL);
+
+END pkg_med_adherence;
+/
+
+```
+### PHASE VII — ADVANCED PROGRAMMING & AUDITING
+HOLIDAY MANAGEMENT TABLE
+```sql
+CREATE TABLE system_holidays (
+    holiday_id    NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    holiday_date  DATE UNIQUE NOT NULL,
+    description   VARCHAR2(200)
+);
+
+```
+creating trigger
+```sql
+
+CREATE OR REPLACE TRIGGER trg_adherence_insert_block
+  BEFORE INSERT ON adherence_log
+  FOR EACH ROW
+DECLARE
+  v_rule  VARCHAR2(20);
+BEGIN
+  -- Step 1: Get the restriction rule
+  v_rule := fn_restrict_changes();   -- make sure this function is in your schema and returns WEEKDAY / HOLIDAY / anything else
+
+  -- Step 2: If restricted → audit + block
+  IF v_rule IN ('WEEKDAY', 'HOLIDAY') THEN
+
+    -- Audit the block attempt
+    BEGIN
+      pr_write_audit(
+        p_operation => 'INSERT',
+        p_table     => 'ADHERENCE_LOG',
+        p_key       => NULL,                     -- or :NEW.id if you have a PK
+        p_status    => 'BLOCKED',
+        p_message   => 'Insert blocked - Reason: ' || 
+                       CASE v_rule 
+                         WHEN 'WEEKDAY' THEN 'Weekday restriction' 
+                         WHEN 'HOLIDAY' THEN 'Public holiday' 
+                       END
+      );
+    EXCEPTION
+      WHEN OTHERS THEN NULL;  -- never let audit failure hide the real block
+    END;
+
+    -- Now actually block the insert
+    RAISE_APPLICATION_ERROR(
+      -20001,
+      'INSERT on ADHERENCE_LOG is not allowed on ' ||
+      CASE v_rule WHEN 'WEEKDAY' THEN 'weekdays' ELSE 'public holidays' END || '.'
+    );
+  END IF;
+
+  -- Step 3: If we get here → everything is allowed → write success audit
+  pr_write_audit(
+    p_operation => 'INSERT',
+    p_table     => 'ADHERENCE_LOG',
+    p_key       => NULL,
+    p_status    => 'SUCCESS',
+    p_message   => 'Insert allowed'
+  );
+
+EXCEPTION
+  WHEN OTHERS THEN
+    -- If something completely unexpected happens, still try to audit it
+    BEGIN
+      pr_write_audit('INSERT','ADHERENCE_LOG',NULL,'ERROR',SQLERRM);
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+    RAISE;  -- re-re-throw the original error
+END;
+/
+```
+
+
+
