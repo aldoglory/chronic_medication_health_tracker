@@ -1,8 +1,8 @@
-Project Overview
-Project Name: Chronic Disease Medication Adherence Monitoring System
-Project Lead: Ruterana Gloire
-Student ID: 27717
-Date: December 2025
+# Project Overview
+# Project Name: Chronic Disease Medication Adherence Monitoring System
+# Project Lead: Ruterana Gloire
+# Student ID: 27717
+# Date: December 2025
 
 ## Executive Summary
 The Chronic Disease Medication Adherence Monitoring System is a comprehensive digital health solution designed to address one of healthcare's most persistent challenges: medication non-adherence among chronic disease patients. This system combines smart reminder technology, real-time tracking, and healthcare provider monitoring to create a seamless ecosystem that supports patients in managing their medication schedules while enabling healthcare workers to provide proactive, data-driven care.
