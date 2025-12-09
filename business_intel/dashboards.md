@@ -4,7 +4,7 @@
 ![screenshot](screenshot/bidash.jpeg)
 
 ## 2. Audit Activity Dashboard
-![screenshot](screenshot/audit.jpeg)
+![screenshot](https://github.com/aldoglory/chronic_medication_health_tracker/blob/f41d6d97ab24691e7de7ddb41e588479ed59a5a1/screenshot/audit.jpeg)
 
 
 
